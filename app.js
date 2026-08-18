@@ -34,19 +34,45 @@ async function loadCSV() {
     }
 
     const csvText = await response.text();
-    
-    // 読み込んだデータがHTMLだった場合（404ページなどを読み込んだ場合）
-    if (csvText.includes('<html') || csvText.includes('<!DOCTYPE')) {
-        alert("CSVではなくHTMLが読み込まれています。ファイルのパスや配置を確認してください。");
-        return [];
+    const lines = csvText.trim().split('\n').slice(1);
+
+    function parseCSVLine(line) {
+        const result = [];
+        let current = '';
+        let inQuotes = false;
+        
+        for (let i = 0; i < line.length; i++) {
+            const char = line[i];
+            
+            if (char === '"') {
+                // 現在ダブルクォーテーションで囲まれている最中で、かつ次の文字もダブルクォーテーションの場合
+                if (inQuotes && line[i + 1] === '"') {
+                    current += '"'; // 文字として1つだけ追加する
+                    i++;            // 次の文字(2つ目の")は処理済みなのでスキップ
+                } else {
+                    // それ以外の場合は、囲みの開始・終了の切り替え
+                    inQuotes = !inQuotes;
+                }
+            } else if (char === ',' && !inQuotes) {
+                // ダブルクォーテーションの外にあるカンマなら区切る
+                result.push(current);
+                current = '';
+            } else {
+                // それ以外の文字
+                current += char;
+            }
+        }
+        result.push(current);
+        return result;
     }
     
-    // 行ごとに分割し、ヘッダー（1行目）を除外
-    const lines = csvText.trim().split('\n').slice(1);
-    
     return lines.map(line => {
-        const [title, difficulty] = line.split(',');
-        const id = `${title}_${difficulty}`.replace(/\s+/g, '');
+        // 単純な split(',') ではなく、作成した関数で分割する
+        const [title, difficulty] = parseCSVLine(line);
+        
+        // idを生成する際、空白に加えてダブルクォーテーションも除去しておく
+        const id = `${title}_${difficulty}`.replace(/[\s"]/g, '');
+        
         return { id, title, difficulty };
     });
 }
