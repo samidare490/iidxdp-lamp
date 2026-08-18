@@ -61,6 +61,18 @@ async function loadClearData() {
     return statusData; // { 'StarrySky_NORMAL': 'クリア', ... }
 }
 
+function updateCardColor(cardElement, status) {
+    // 既存のすべてのステータスクラスを削除
+    Object.values(statusClasses).forEach(className => {
+        cardElement.classList.remove(className);
+    });
+
+    // 新しいステータスに対応するクラスを追加
+    if (statusClasses[status]) {
+        cardElement.classList.add(statusClasses[status]);
+    }
+}
+
 // 画面を構築する関数
 async function initApp() {
     const container = document.getElementById('game-data-container');
