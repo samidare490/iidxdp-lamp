@@ -145,6 +145,107 @@ async function initApp() {
             }
         });
     });
+
+    const modal = document.getElementById('stats-modal');
+    const openModalBtn = document.getElementById('open-modal-btn');
+    const closeModalBtn = document.getElementById('close-modal-btn');
+    let chartInstance = null;
+
+    // 難易度ごとのクリア状況を集計してグラフを描画する関数
+    function renderStatsChart() {
+        const cards = container.querySelectorAll('.card');
+        const difficulties = [];
+        const stats = {};
+        const statuses = ["NOPLAY", "FAILED", "EASY", "HARD"];
+
+        // 1. 各カードから難易度と選択中のステータスを集計
+        cards.forEach(card => {
+            const diff = card.querySelector('.song-diff').textContent.trim();
+            const status = card.querySelector('select').value;
+
+            if (!stats[diff]) {
+                stats[diff] = { "NOPLAY": 0, "FAILED": 0, "EASY": 0, "HARDト": 0 };
+                difficulties.push(diff);
+            }
+            stats[diff][status]++;
+        });
+
+        // 2. 100%比率に変換したデータセットを作成
+        const colorPalette = {
+            "NOPLAY": "#ffffff",
+            "FAILED": "#8b8b8b",
+            "EASY": "#73ff45",
+            "HARD": "#ff5959"
+        };
+
+        const datasets = statuses.map(status => {
+            const data = difficulties.map(diff => {
+                const total = statuses.reduce((sum, s) => sum + stats[diff][s], 0);
+                return total > 0 ? ((stats[diff][status] / total) * 100).toFixed(1) : 0;
+            });
+
+            return {
+                label: status,
+                data: data,
+                backgroundColor: colorPalette[status]
+            };
+        });
+
+        // 3. 既存のグラフがあれば破棄して再作成
+        if (chartInstance) {
+            chartInstance.destroy();
+        }
+
+        const ctx = document.getElementById('statsChart').getContext('2d');
+        chartInstance = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: difficulties,
+                datasets: datasets
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                scales: {
+                    x: {
+                        stacked: true // X軸で積み上げ
+                    },
+                    y: {
+                        stacked: true, // Y軸で積み上げ
+                        max: 100,      // 100%積み上げ
+                        ticks: {
+                            callback: value => value + "%"
+                        }
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: context => `${context.dataset.label}: ${context.raw}%`
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // モーダルを開く
+    openModalBtn.addEventListener('click', () => {
+        modal.style.display = 'flex';
+        renderStatsChart();
+    });
+
+    // 閉じるボタンで閉じる
+    closeModalBtn.addEventListener('click', () => {
+        modal.style.display = 'none';
+    });
+
+    // 背景クリックで閉じる
+    window.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.style.display = 'none';
+        }
+    });
 }
 
 // アプリの起動
