@@ -190,7 +190,7 @@ async function initApp() {
             const status = card.querySelector('select').value;
 
             if (!stats[diff]) {
-                stats[diff] = { "NOPLAY": 0, "FAILED": 0, "EASY": 0, "HARDト": 0 };
+                stats[diff] = { "NOPLAY": 0, "FAILED": 0, "EASY": 0, "HARD": 0 };
                 difficulties.push(diff);
             }
             stats[diff][status]++;
@@ -240,7 +240,7 @@ async function initApp() {
                         stacked: true, // Y軸で積み上げ
                         max: 100,      // 100%積み上げ
                         ticks: {
-                            callback: value => value + "%"
+                            display: false
                         }
                     }
                 },
