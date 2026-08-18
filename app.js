@@ -19,7 +19,7 @@ const db = getFirestore(app);
 
 // CSVデータを読み込んでパースする関数
 async function loadCSV() {
-    const response = await fetch('songs.csv');
+    const response = await fetch('11.csv');
     const csvText = await response.text();
     
     // 行ごとに分割し、ヘッダー（1行目）を除外
