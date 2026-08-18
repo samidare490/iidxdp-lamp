@@ -124,6 +124,27 @@ async function initApp() {
             }
         }
     });
+
+    const searchInput = document.getElementById('search-input');
+    searchInput.addEventListener('input', (e) => {
+        // 入力された文字を取得（大文字・小文字を区別しないように小文字に変換）
+        const keyword = e.target.value.toLowerCase();
+        
+        // すべてのカード要素を取得
+        const cards = container.querySelectorAll('.card');
+        
+        cards.forEach(card => {
+            // カード内の曲名を取得
+            const title = card.querySelector('.song-title').textContent.toLowerCase();
+            
+            // 曲名に入力したキーワードが含まれていれば表示、なければ非表示
+            if (title.includes(keyword)) {
+                card.style.display = 'flex'; // .card は元々 display: flex
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    });
 }
 
 // アプリの起動
