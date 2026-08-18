@@ -62,13 +62,13 @@ select {
 }
 
 .status-failed {
-    background-color: #f9f9f9;
+    background-color: #8B8B8B;
 }
 
 .status-easy {
-    background-color: #e6fffa;
+    background-color: #73ff45;
 }
 
 .status-hard {
-    background-color: #ff3e30;
+    background-color: #ff5959;
 }
