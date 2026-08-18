@@ -5,15 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>IIDX DP Lamp</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <h1>IIDX DP Lamp</h1>
     <div class="search-container">
         <input type="text" id="search-input" placeholder="曲名で検索...">
+        <button id="open-modal-btn" class="stats-btn">📊 統計グラフ</button>
     </div>
     <!-- ここにデータが動的に追加されます -->
     <div id="game-data-container" class="grid-container"></div>
 
+    <div id="stats-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>クリア状況 統計グラフ</h2>
+                <button id="close-modal-btn" class="close-btn">&times;</button>
+            </div>
+            <div class="chart-wrapper">
+                <canvas id="statsChart"></canvas>
+            </div>
+        </div>
+    </div>
+    
     <!-- モジュールとしてJSを読み込む -->
     <script type="module" src="app.js"></script>
 </body>
