@@ -16,6 +16,13 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
+const statusClasses = {
+    "NOPLAY": "status-notplayed",
+    "FAILED": "status-failed",
+    "EASY": "status-easy",
+    "HARD": "status-hard"
+};
+
 // CSVデータを読み込んでパースする関数
 async function loadCSV() {
     const response = await fetch('11.csv');
