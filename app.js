@@ -6,7 +6,6 @@ import { getFirestore, doc, setDoc, getDocs, collection } from "https://www.gsta
 const firebaseConfig = {
   apiKey: "AIzaSyAiFZuSFftUNWD57s8mmqrRo53yRv2MFYA",
   authDomain: "iidxdp-lamp.firebaseapp.com",
-  databaseURL: "https://iidxdp-lamp-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "iidxdp-lamp",
   storageBucket: "iidxdp-lamp.firebasestorage.app",
   messagingSenderId: "1070802681747",
@@ -69,6 +68,8 @@ async function initApp() {
         // カード要素の作成
         const card = document.createElement('div');
         card.className = 'card';
+        updateCardColor(card, currentStatus);
+      
         card.innerHTML = `
             <div class="song-title">${song.title}</div>
             <div class="song-diff">${song.difficulty}</div>
@@ -87,19 +88,20 @@ async function initApp() {
         if (e.target.tagName === 'SELECT') {
             const songId = e.target.getAttribute('data-id');
             const newStatus = e.target.value;
-    
-            // 保存処理が始まったことを通知
-            alert("保存処理を開始します...");
-    
+
+          // 【追加】プルダウン変更時に、即座にカードの色を変更する
+            const cardElement = e.target.closest('.card');
+            updateCardColor(cardElement, newStatus);
+
             try {
+                // Firestoreにデータを保存 (上書き)
                 await setDoc(doc(db, "clear_status", songId), {
                     status: newStatus
                 });
-                // 成功した場合は画面にお知らせ
-                alert("✅ 保存に成功しました！");
+                console.log(`${songId} の状態を「${newStatus}」に保存しました。`);
             } catch (error) {
-                // エラーが発生した場合は詳細なエラーメッセージを画面に表示
-                alert("❌ 保存エラーが発生しました:\n" + error.message);
+                console.error("保存エラー:", error);
+                alert("データの保存に失敗しました。");
             }
         }
     });
