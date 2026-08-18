@@ -20,14 +20,26 @@ const db = getFirestore(app);
 // CSVデータを読み込んでパースする関数
 async function loadCSV() {
     const response = await fetch('11.csv');
+    
+    // ファイルが存在しない（404エラーなど）場合は処理を止める
+    if (!response.ok) {
+        alert(`CSVの読み込みに失敗しました: ${response.status}`);
+        return [];
+    }
+
     const csvText = await response.text();
+    
+    // 読み込んだデータがHTMLだった場合（404ページなどを読み込んだ場合）
+    if (csvText.includes('<html') || csvText.includes('<!DOCTYPE')) {
+        alert("CSVではなくHTMLが読み込まれています。ファイルのパスや配置を確認してください。");
+        return [];
+    }
     
     // 行ごとに分割し、ヘッダー（1行目）を除外
     const lines = csvText.trim().split('\n').slice(1);
     
     return lines.map(line => {
         const [title, difficulty] = line.split(',');
-        // FirebaseのドキュメントIDとして使えるように一意のIDを生成 (例: StarrySky_NORMAL)
         const id = `${title}_${difficulty}`.replace(/\s+/g, '');
         return { id, title, difficulty };
     });
