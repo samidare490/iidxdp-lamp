@@ -33,6 +33,7 @@ h1 {
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     display: flex;
     flex-direction: column;
+    transition: background-color 0.3s ease; /* 色の変化を滑らかにする */
 }
 
 .song-title {
@@ -54,4 +55,20 @@ select {
     border: 1px solid #ccc;
     font-size: 1em;
     margin-top: auto; /* 下部に寄せる */
+}
+
+.status-notplayed {
+    background-color: #ffffff;
+}
+
+.status-failed {
+    background-color: #f9f9f9;
+}
+
+.status-easy {
+    background-color: #e6fffa;
+}
+
+.status-hard {
+    background-color: #ff3e30;
 }
