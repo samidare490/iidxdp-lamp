@@ -87,16 +87,19 @@ async function initApp() {
         if (e.target.tagName === 'SELECT') {
             const songId = e.target.getAttribute('data-id');
             const newStatus = e.target.value;
-
+    
+            // 保存処理が始まったことを通知
+            alert("保存処理を開始します...");
+    
             try {
-                // Firestoreにデータを保存 (上書き)
                 await setDoc(doc(db, "clear_status", songId), {
                     status: newStatus
                 });
-                console.log(`${songId} の状態を「${newStatus}」に保存しました。`);
+                // 成功した場合は画面にお知らせ
+                alert("✅ 保存に成功しました！");
             } catch (error) {
-                console.error("保存エラー:", error);
-                alert("データの保存に失敗しました。");
+                // エラーが発生した場合は詳細なエラーメッセージを画面に表示
+                alert("❌ 保存エラーが発生しました:\n" + error.message);
             }
         }
     });
