@@ -24,8 +24,8 @@ const statusClasses = {
 };
 
 // CSVデータを読み込んでパースする関数
-async function loadCSV() {
-    const response = await fetch('11.csv');
+async function loadCSV(filename) {
+    const response = await fetch(filename);
     
     // ファイルが存在しない（404エラーなど）場合は処理を止める
     if (!response.ok) {
@@ -87,6 +87,42 @@ async function loadClearData() {
     return statusData; // { 'StarrySky_NORMAL': 'クリア', ... }
 }
 
+// 👇ここから追加：取得したFirestoreのデータを保持する変数
+let savedStatusCache = {};
+
+// 👇ここから追加：画面（カード一覧）を再構築する関数
+async function buildScreen(csvFilename) {
+    const container = document.getElementById('game-data-container');
+    container.innerHTML = ''; // 画面を一旦リセット
+
+    // 指定されたCSVを読み込む
+    const songs = await loadCSV(csvFilename);
+
+    songs.forEach(song => {
+        // キャッシュから状態を取得（なければNOPLAY）
+        const currentStatus = savedStatusCache[song.id] || "NOPLAY";
+        
+        const card = document.createElement('div');
+        card.className = 'card';
+        updateCardColor(card, currentStatus);
+
+        card.innerHTML = `
+            <div class="song-title">${song.title}</div>
+            <select data-id="${song.id}">
+                <option value="NOPLAY" ${currentStatus === "NOPLAY" ? "selected" : ""}>NOPLAY</option>
+                <option value="FAILED" ${currentStatus === "FAILED" ? "selected" : ""}>FAILED</option>
+                <option value="EASY" ${currentStatus === "EASY" ? "selected" : ""}>EASY</option>
+                <option value="HARD" ${currentStatus === "HARD" ? "selected" : ""}>HARD</option>
+            </select>
+        `;
+        container.appendChild(card);
+    });
+
+    // 検索状態の復元（文字が入力されたまま切り替えた場合、絞り込みを即座に再適用する）
+    const searchInput = document.getElementById('search-input');
+    searchInput.dispatchEvent(new Event('input'));
+}
+
 function updateCardColor(cardElement, status) {
     // 既存のすべてのステータスクラスを削除
     Object.values(statusClasses).forEach(className => {
@@ -103,30 +139,23 @@ function updateCardColor(cardElement, status) {
 async function initApp() {
     const container = document.getElementById('game-data-container');
     
-    // CSVとFirebaseの両方からデータを取得
-    const [songs, savedStatus] = await Promise.all([loadCSV(), loadClearData()]);
+    // 初回のみFirestoreから全データを取得してキャッシュに保存
+    savedStatusCache = await loadClearData();
 
-    songs.forEach(song => {
-        // 保存されたステータスがあるか確認。なければ「未プレイ」
-        const currentStatus = savedStatus[song.id] || "NOPLAY";
-
-        // カード要素の作成
-        const card = document.createElement('div');
-        card.className = 'card';
-        updateCardColor(card, currentStatus);
-      
-        card.innerHTML = `
-            <div class="song-title">${song.title}</div>
-            <div class="song-diff">${song.difficulty}</div>
-            <select data-id="${song.id}">
-                <option value="NOPLAY" ${currentStatus === "NOPLAY" ? "selected" : ""}>NOPLAY</option>
-                <option value="FAILED" ${currentStatus === "FAILED" ? "selected" : ""}>FAILED</option>
-                <option value="EASY" ${currentStatus === "EASY" ? "selected" : ""}>EASY</option>
-                <option value="HARD" ${currentStatus === "HARD" ? "selected" : ""}>HARD</option>
-            </select>
-        `;
-        container.appendChild(card);
+    // 👇ここから追加：チップスの切り替えイベント
+    const radios = document.querySelectorAll('input[name="csv-choice"]');
+    radios.forEach(radio => {
+        radio.addEventListener('change', (e) => {
+            if (e.target.checked) {
+                // 選択されたCSVファイル名で画面を再構築
+                buildScreen(e.target.value);
+            }
+        });
     });
+
+    // 初期表示（最初からcheckedになっているラジオボタンのCSVを読み込む）
+    const initialCsv = document.querySelector('input[name="csv-choice"]:checked').value;
+    await buildScreen(initialCsv);
 
     // プルダウン変更時にFirebaseに保存するイベントリスナー
     container.addEventListener('change', async (e) => {
@@ -134,7 +163,9 @@ async function initApp() {
             const songId = e.target.getAttribute('data-id');
             const newStatus = e.target.value;
 
-          // 【追加】プルダウン変更時に、即座にカードの色を変更する
+            // 👇ここを追加：変更されたらキャッシュも最新の状態に上書きする
+            savedStatusCache[songId] = newStatus;
+
             const cardElement = e.target.closest('.card');
             updateCardColor(cardElement, newStatus);
 
