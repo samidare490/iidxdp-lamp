@@ -108,6 +108,7 @@ async function buildScreen(csvFilename) {
 
         card.innerHTML = `
             <div class="song-title">${song.title}</div>
+            <div class="song-diff">${song.difficulty}</div>
             <select data-id="${song.id}">
                 <option value="NOPLAY" ${currentStatus === "NOPLAY" ? "selected" : ""}>NOPLAY</option>
                 <option value="FAILED" ${currentStatus === "FAILED" ? "selected" : ""}>FAILED</option>
