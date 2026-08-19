@@ -71,7 +71,7 @@ async function loadCSV() {
         const [title, difficulty] = parseCSVLine(line);
         
         // idを生成する際、空白に加えてダブルクォーテーションも除去しておく
-        const id = `${title}_${difficulty}`.replace(/[\s"]/g, '');
+        const id = `${title}`.replace(/[\s"]/g, '');
         
         return { id, title, difficulty };
     });
