@@ -182,7 +182,7 @@ async function initApp() {
         const cards = container.querySelectorAll('.card');
         const difficulties = [];
         const stats = {};
-        const statuses = ["NOPLAY", "FAILED", "EASY", "HARD"];
+        const statuses = ["HARD", "EASY", "FAILED", "NOPLAY"];
 
         // 1. 各カードから難易度と選択中のステータスを集計
         cards.forEach(card => {
@@ -190,7 +190,7 @@ async function initApp() {
             const status = card.querySelector('select').value;
 
             if (!stats[diff]) {
-                stats[diff] = { "NOPLAY": 0, "FAILED": 0, "EASY": 0, "HARD": 0 };
+                stats[diff] = { "HARD": 0, "EASY": 0, "FAILED": 0, "NOPLAY": 0 };
                 difficulties.push(diff);
             }
             stats[diff][status]++;
