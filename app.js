@@ -205,6 +205,9 @@ async function initApp() {
         };
 
         const datasets = statuses.map(status => {
+            // 実際の項目数（件数）を配列として取得
+            const rawCounts = difficulties.map(diff => stats[diff][status]);
+            
             const data = difficulties.map(diff => {
                 const total = statuses.reduce((sum, s) => sum + stats[diff][s], 0);
                 return total > 0 ? ((stats[diff][status] / total) * 100).toFixed(1) : 0;
@@ -213,6 +216,7 @@ async function initApp() {
             return {
                 label: status,
                 data: data,
+                rawCounts: rawCounts, // 👈ここに追加：実数をデータセットに持たせる
                 backgroundColor: colorPalette[status]
             };
         });
@@ -233,21 +237,22 @@ async function initApp() {
                 responsive: true,
                 maintainAspectRatio: true,
                 scales: {
-                    x: {
-                        stacked: true // X軸で積み上げ
-                    },
-                    y: {
-                        stacked: true, // Y軸で積み上げ
-                        max: 100,      // 100%積み上げ
-                        ticks: {
-                            display: false
-                        }
+                    x: { stacked: true },
+                    y: { 
+                        stacked: true, 
+                        max: 100,      
+                        ticks: { display: false } 
                     }
                 },
                 plugins: {
                     tooltip: {
                         callbacks: {
-                            label: context => `${context.dataset.label}: ${context.raw}%`
+                            // 👈labelの関数を書き換えます
+                            label: context => {
+                                // マウスが乗っている項目の実数（件数）を取得して表示
+                                const count = context.dataset.rawCounts[context.dataIndex];
+                                return `${context.dataset.label}: ${count}曲`;
+                            }
                         }
                     }
                 }
