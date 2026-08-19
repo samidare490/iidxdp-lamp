@@ -9,6 +9,14 @@
 </head>
 <body>
     <h1>IIDX DP Lamp</h1>
+    <div class="chips-container">
+        <!-- 初期状態で選択される方に「checked」を付けます -->
+        <input type="radio" id="csv1" name="csv-choice" value="11.csv" checked>
+        <label for="csv1" class="chip">☆11</label>
+
+        <input type="radio" id="csv2" name="csv-choice" value="12.csv">
+        <label for="csv2" class="chip">☆12</label>
+    </div>
     <div class="search-container">
         <input type="text" id="search-input" placeholder="曲名で検索...">
         <button id="open-modal-btn" class="stats-btn">📊 統計グラフ</button>
