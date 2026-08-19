@@ -259,6 +259,10 @@ async function initApp() {
         }
 
         const ctx = document.getElementById('statsChart').getContext('2d');
+        
+        // 👇ここから追加：画面幅が768px未満なら「スマホ（縦長）」と判定
+        const isMobile = window.innerWidth < 768;
+
         chartInstance = new Chart(ctx, {
             type: 'bar',
             data: {
@@ -266,22 +270,34 @@ async function initApp() {
                 datasets: datasets
             },
             options: {
+                // 👇スマホなら横向き('y')、PCなら縦向き('x')に自動切り替え
+                indexAxis: isMobile ? 'y' : 'x', 
+                
                 responsive: true,
-                maintainAspectRatio: true,
+                maintainAspectRatio: false, // 画面幅に合わせて縦横比が潰れないようにする
+                
                 scales: {
-                    x: { stacked: true },
-                    y: { 
+                    x: {
+                        stacked: true,
+                        // 👇スマホ(横向き)のときはX軸がパーセントになるため、100%上限にして目盛りを消す
+                        max: isMobile ? 100 : undefined,
+                        ticks: {
+                            display: isMobile ? false : true 
+                        }
+                    },
+                    y: {
                         stacked: true, 
-                        max: 100,      
-                        ticks: { display: false } 
+                        // 👇PC(縦向き)のときはY軸がパーセントになるため、100%上限にして目盛りを消す
+                        max: isMobile ? undefined : 100,
+                        ticks: {
+                            display: isMobile ? true : false
+                        }
                     }
                 },
                 plugins: {
                     tooltip: {
                         callbacks: {
-                            // 👈labelの関数を書き換えます
                             label: context => {
-                                // マウスが乗っている項目の実数（件数）を取得して表示
                                 const count = context.dataset.rawCounts[context.dataIndex];
                                 return `${context.dataset.label}: ${count}曲`;
                             }
